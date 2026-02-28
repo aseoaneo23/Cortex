@@ -1,165 +1,260 @@
 openapi: 3.0.3
 info:
   title: Cortex API
-  description: An API to manage the knowledge base of the Cortex system, allowing for the creation, retrieval, generation, and deletion of knowledge entries.
+  description: A comprehensive API for managing the Cortex system, including note management, inbox processing, and batch operations.
   version: 1.0.0
 servers:
   - url: http://localhost:8080
 paths:
-  /brain/knowledge/{knowledge_id}:
-    post:
-      summary: Create a new knowledge entry
-      tags: [Knowledge creation]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              $ref: '#/components/schemas/KnowledgeEntry'
-
+  /:
+    get:
+      summary: Health check
+      tags: [Health]
       responses:
-        '201':
-          description: Knowledge entry created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/KnowledgeEntry'
-        '400':
-          description: Invalid request
+        '200':
+          description: API is running
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
-                    example: "The 'title' field is required."
+                    example: "Cortex API is running 🧠"
+  /brain:
     get:
-      summary: List knowledge entries with optional status filter
-      tags: [Knowledge listing]
-      parameters:
-          - name: status
-            in: query
-            description: Filter by the state of the knowledge entries
-            required: false
-            schema:
-                type: string
-                enum: [unknown (not confirmed knowledge), known (confirmed knowledge)]
-          - name: knowledge_id
-            in: path
-            description: Filter by knowledge entry ID
-            required: false
-            schema:
-                type: number
+      summary: Get all notes
+      tags: [Brain - Notes]
+      description: Retrieve all notes ordered by creation date (descending)
       responses:
         '200':
-          description: List of entries
+          description: List of all notes
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/KnowledgeEntry'
-        '400':
-          description: Bad request, check query parameters
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Invalid status value. Allowed values are 'unknown', 'known'."
-  /brain/knowledge/generate/{knowledge_id}:
-    post:
-      summary: Accept a suggested knowledge topic and generate knowledge entries
-      tags: [Knowledge suggestion generation]
+                  $ref: '#/components/schemas/Note'
+  /brain/search:
+    get:
+      summary: Search notes
+      tags: [Brain - Notes]
+      description: Search notes using LIKE query on title, tags, content, and summary
       parameters:
-        - name : knowledge_id
+        - name: q
           in: query
-          description: The ID of the knowledge entry to accept for generation
+          description: Search query string
           required: true
           schema:
-            type: number
+            type: string
+          example: "artificial intelligence"
       responses:
-        '204':
-          description: Knowledge acquired successfully
-        '400':
-          description: Invalid request
+        '200':
+          description: Search results
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "The 'knowledge_id' does not exist or is not in a valid state for generation."
-  /brain/knowledge/forget/{knowledge_id}:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Note'
+        '400':
+          description: Bad request - query parameter required
+  /brain/{id}:
     delete:
-      summary: Forget a knowledge entry
-      tags: [Knowledge deletion]
+      summary: Delete a note
+      tags: [Brain - Notes]
       parameters:
-        - name : knowledge_id
-          in: query
-          description: The ID of the knowledge entry to forget
+        - name: id
+          in: path
+          description: The ID of the note to delete
           required: true
           schema:
-            type: number
+            type: string
       responses:
-        '204':
-          description: Knowledge entry forgotten successfully
-        '400':
-          description: Invalid request
+        '200':
+          description: Note deleted successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
-                    example: "The 'knowledge_id' does not exist or is not in a valid state for forgetting."
-  /brain/knowledge/decline/{knowledge_id}:
+                    example: "Note deleted successfully"
+  /inbox:
     post:
-      summary: Decline a suggested knowledge topic
-      tags: [Knowledge suggestion declination]
+      summary: Create an inbox item
+      tags: [Inbox]
+      description: Create a new inbox item with status set to pending
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboxItemRequest'
+      responses:
+        '201':
+          description: Inbox item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxItem'
+        '400':
+          description: Invalid request - check required fields
+  /inbox/pending:
+    get:
+      summary: Get pending inbox items
+      tags: [Inbox]
+      description: List all inbox items with pending status
+      responses:
+        '200':
+          description: List of pending items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InboxItem'
+  /inbox/{id}:
+    delete:
+      summary: Discard an inbox item
+      tags: [Inbox]
+      description: Mark an inbox item as discarded
       parameters:
-        - name : knowledge_id
-          in: query
-          description: The ID of the knowledge entry to decline
+        - name: id
+          in: path
+          description: The ID of the inbox item to discard
           required: true
           schema:
-            type: number
+            type: string
       responses:
-        '204':
-          description: Knowledge topic declined successfully
-        '400':
-          description: Invalid request
+        '200':
+          description: Item discarded successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
-                    example: "The 'knowledge_id' does not exist or is not in a valid state for declining."
+                    example: "Item discarded"
+                  id:
+                    type: string
+  /process/{id}:
+    post:
+      summary: Process a single inbox item
+      tags: [Process]
+      description: Process a single inbox item and create a note from it
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the inbox item to process
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Item processed successfully"
+                  note:
+                    $ref: '#/components/schemas/Note'
+        '400':
+          description: Invalid request - item not found or already processed
+  /process/batch/all:
+    post:
+      summary: Process all pending items
+      tags: [Process]
+      description: Process all pending inbox items in batch and create notes from them
+      responses:
+        '200':
+          description: Batch processing completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Processed 5 items"
+                  processed:
+                    type: integer
+                    example: 5
+                  notes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Note'
 components:
   schemas:
-    KnowledgeEntry:
+    Note:
       type: object
       properties:
+        id:
+          type: string
+          example: "550e8400-e29b-41d4-a716-446655440000"
         title:
           type: string
           example: "What is artificial intelligence?"
         content:
           type: string
-          example: "Artificial intelligence is..."
-        topic:
+          example: "Artificial intelligence is the simulation of human intelligence processes by machines..."
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["AI", "technology", "learning"]
+        summary:
           type: string
-          example: "Artificial Intelligence"
-        state:
-          type: StateType
+          example: "A comprehensive overview of artificial intelligence"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-02-28T10:30:00Z"
+    InboxItemRequest:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        title:
+          type: string
+          example: "New knowledge about AI"
+        content:
+          type: string
+          example: "AI is becoming increasingly important..."
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["AI", "technology"]
+    InboxItem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        title:
+          type: string
+          example: "New knowledge about AI"
+        content:
+          type: string
+          example: "AI is becoming increasingly important..."
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["AI", "technology"]
+        status:
+          type: string
+          enum: [pending, processed, discarded]
           example: "pending"
         createdAt:
           type: string
           format: date-time
+          example: "2024-02-28T10:30:00Z"

@@ -1,3 +1,4 @@
 target
 .idea
 package-lock.json
+./cortexdb
