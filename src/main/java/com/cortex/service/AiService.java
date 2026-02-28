@@ -1,4 +1,4 @@
-package com.digitalbrain.service;
+package com.cortex.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
