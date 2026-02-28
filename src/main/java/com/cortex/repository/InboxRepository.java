@@ -34,9 +34,11 @@ public class InboxRepository {
         return item;
     }
 
-    public List<Knowledge> findAllPending() {
+    //Se llama igual el model que la tabla
+
+    public List<Knowledge> getAllKnowledge() {
         return jdbc.query(
-                "SELECT * FROM inbox_items WHERE status = 'pending' ORDER BY created_at DESC",
+                "SELECT * FROM Knowledge ",
                 rowMapper);
     }
 
