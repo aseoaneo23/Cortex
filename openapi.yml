@@ -1,61 +1,165 @@
 openapi: 3.0.3
 info:
-  title: Hackathon MVP API
+  title: Cortex API
+  description: An API to manage the knowledge base of the Cortex system, allowing for the creation, retrieval, generation, and deletion of knowledge entries.
   version: 1.0.0
 servers:
   - url: http://localhost:8080
 paths:
-  /entries:
+  /brain/knowledge/{knowledge_id}:
     post:
-      summary: Crear una nueva entrada
+      summary: Create a new knowledge entry
+      tags: [Knowledge creation]
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              properties:
-                content:
-                  type: string
+              $ref: '#/components/schemas/KnowledgeEntry'
+
       responses:
         '201':
-          description: Entrada creada
+          description: Knowledge entry created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Entry'
+                $ref: '#/components/schemas/KnowledgeEntry'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "The 'title' field is required."
     get:
-      summary: Listar todas las entradas
+      summary: List knowledge entries with optional status filter
+      tags: [Knowledge listing]
+      parameters:
+          - name: status
+            in: query
+            description: Filter by the state of the knowledge entries
+            required: false
+            schema:
+                type: string
+                enum: [unknown (not confirmed knowledge), known (confirmed knowledge)]
+          - name: knowledge_id
+            in: path
+            description: Filter by knowledge entry ID
+            required: false
+            schema:
+                type: number
       responses:
         '200':
-          description: Lista de entradas
+          description: List of entries
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Entry'
-
+                  $ref: '#/components/schemas/KnowledgeEntry'
+        '400':
+          description: Bad request, check query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid status value. Allowed values are 'unknown', 'known'."
+  /brain/knowledge/generate/{knowledge_id}:
+    post:
+      summary: Accept a suggested knowledge topic and generate knowledge entries
+      tags: [Knowledge suggestion generation]
+      parameters:
+        - name : knowledge_id
+          in: query
+          description: The ID of the knowledge entry to accept for generation
+          required: true
+          schema:
+            type: number
+      responses:
+        '204':
+          description: Knowledge acquired successfully
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "The 'knowledge_id' does not exist or is not in a valid state for generation."
+  /brain/knowledge/forget/{knowledge_id}:
+    delete:
+      summary: Forget a knowledge entry
+      tags: [Knowledge deletion]
+      parameters:
+        - name : knowledge_id
+          in: query
+          description: The ID of the knowledge entry to forget
+          required: true
+          schema:
+            type: number
+      responses:
+        '204':
+          description: Knowledge entry forgotten successfully
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "The 'knowledge_id' does not exist or is not in a valid state for forgetting."
+  /brain/knowledge/decline/{knowledge_id}:
+    post:
+      summary: Decline a suggested knowledge topic
+      tags: [Knowledge suggestion declination]
+      parameters:
+        - name : knowledge_id
+          in: query
+          description: The ID of the knowledge entry to decline
+          required: true
+          schema:
+            type: number
+      responses:
+        '204':
+          description: Knowledge topic declined successfully
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "The 'knowledge_id' does not exist or is not in a valid state for declining."
 components:
   schemas:
-    Entry:
+    KnowledgeEntry:
       type: object
       properties:
-        id:
-          type: integer
+        title:
+          type: string
+          example: "What is artificial intelligence?"
         content:
           type: string
-        detected_type:
+          example: "Artificial intelligence is..."
+        topic:
           type: string
-        status:
-          type: string
-        topic_suggested:
-          type: string
-        topic_final:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-        processed_at:
+          example: "Artificial Intelligence"
+        state:
+          type: StateType
+          example: "pending"
+        createdAt:
           type: string
           format: date-time
