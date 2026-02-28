@@ -1,9 +1,8 @@
-package com.digitalbrain.service;
+package com.cortex.service;
 
-import com.digitalbrain.model.InboxItem;
-import com.digitalbrain.model.Note;
-import com.digitalbrain.repository.InboxRepository;
-import com.digitalbrain.repository.NoteRepository;
+import com.cortex.model.Knowledge;
+import com.cortex.repository.InboxRepository;
+import com.cortex.repository.NoteRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,7 +27,7 @@ public class ProcessService {
     }
 
     public Note processSingle(String itemId) {
-        InboxItem item = inboxRepo.findById(itemId)
+        Knowledge item = inboxRepo.findById(itemId)
                 .filter(i -> "pending".equals(i.getStatus()))
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Pending item not found: " + itemId));
@@ -37,9 +36,9 @@ public class ProcessService {
     }
 
     public List<Note> processAll() {
-        List<InboxItem> pending = inboxRepo.findAllPending();
+        List<Knowledge> pending = inboxRepo.findAllPending();
         List<Note> results = new ArrayList<>();
-        for (InboxItem item : pending) {
+        for (Knowledge item : pending) {
             try {
                 results.add(processAndSave(item));
             } catch (Exception e) {
@@ -49,7 +48,7 @@ public class ProcessService {
         return results;
     }
 
-    private Note processAndSave(InboxItem item) {
+    private Note processAndSave(Knowledge item) {
         Map<String, Object> aiResult = aiService.processItem(item.getRawContent(), item.getType());
 
         Note note = Note.builder()

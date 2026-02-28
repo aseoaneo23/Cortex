@@ -1,6 +1,5 @@
-package com.digitalbrain.repository;
+package com.cortex.repository;
 
-import com.digitalbrain.model.Note;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;

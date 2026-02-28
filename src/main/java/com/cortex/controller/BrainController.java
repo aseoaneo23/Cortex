@@ -1,14 +1,13 @@
-package com.digitalbrain.controller;
+package com.cortex.controller;
 
-import com.digitalbrain.model.Note;
-import com.digitalbrain.repository.NoteRepository;
+import com.cortex.repository.NoteRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
+//arregar
 @RestController
-@RequestMapping("/brain")
+@RequestMapping("/brain/knowledge")
 public class BrainController {
 
     private final NoteRepository repo;

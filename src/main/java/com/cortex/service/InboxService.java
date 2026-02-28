@@ -1,8 +1,8 @@
-package com.digitalbrain.service;
+package com.cortex.service;
 
-import com.digitalbrain.dto.InboxItemRequest;
-import com.digitalbrain.model.InboxItem;
-import com.digitalbrain.repository.InboxRepository;
+import com.cortex.dto.KnowledgDto;
+import com.cortex.model.Knowledge;
+import com.cortex.repository.InboxRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,8 +20,8 @@ public class InboxService {
         this.repo = repo;
     }
 
-    public InboxItem create(InboxItemRequest req) {
-        InboxItem item = InboxItem.builder()
+    public Knowledge create(KnowledgDto req) {
+        Knowledge item = Knowledge.builder()
                 .id(UUID.randomUUID().toString())
                 .type(req.getType())
                 .rawContent(req.getRawContent())
@@ -32,7 +32,7 @@ public class InboxService {
         return repo.save(item);
     }
 
-    public List<InboxItem> getPending() {
+    public List<Knowledge> getPending() {
         return repo.findAllPending();
     }
 
