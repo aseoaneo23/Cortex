@@ -1,8 +1,10 @@
 package com.cortex.controller;
 
+import com.cortex.model.Knowledge;
 import com.cortex.repository.NoteRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 //arregar
@@ -10,22 +12,22 @@ import java.util.Map;
 @RequestMapping("/brain/knowledge")
 public class BrainController {
 
-    private final NoteRepository repo;
+    private final Knowledge knowledge;
 
-    public BrainController(NoteRepository repo) {
-        this.repo = repo;
+    public BrainController(Knowledge knowledge) {
+        this.knowledge = knowledge;
     }
 
-    /** GET /brain → all notes ordered by created_at desc */
+    /** Quitar */
     @GetMapping
     public List<Note> getAllNotes() {
-        return repo.findAll();
+        return knowledge.findAll();
     }
 
     /** GET /brain/search?q= → LIKE search on title, tags, content, summary */
-    @GetMapping("/search")
-    public List<Note> searchNotes(@RequestParam String q) {
-        return repo.search(q);
+    @GetMapping("/{id}")
+    public Knowledge getKnowlegeById(@RequestParam BigInteger id) {
+        return knowledge.search(q );
     }
 
     /** GET / → health check */
