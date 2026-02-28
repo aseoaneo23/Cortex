@@ -1,0 +1,61 @@
+openapi: 3.0.3
+info:
+  title: Hackathon MVP API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /entries:
+    post:
+      summary: Crear una nueva entrada
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+      responses:
+        '201':
+          description: Entrada creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+    get:
+      summary: Listar todas las entradas
+      responses:
+        '200':
+          description: Lista de entradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Entry'
+
+components:
+  schemas:
+    Entry:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        detected_type:
+          type: string
+        status:
+          type: string
+        topic_suggested:
+          type: string
+        topic_final:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        processed_at:
+          type: string
+          format: date-time
