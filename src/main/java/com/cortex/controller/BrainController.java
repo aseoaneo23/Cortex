@@ -1,7 +1,9 @@
 package com.cortex.controller;
 
+import com.cortex.dto.KnowledgeDto;
 import com.cortex.model.Knowledge;
-import com.cortex.repository.NoteRepository;
+import com.cortex.service.KnowledgeService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
@@ -12,27 +14,30 @@ import java.util.Map;
 @RequestMapping("/brain/knowledge")
 public class BrainController {
 
-    private final Knowledge knowledge;
+    private final KnowledgeService knowledgeService;
 
-    public BrainController(Knowledge knowledge) {
-        this.knowledge = knowledge;
+    public BrainController(KnowledgeService knowledgeService) {
+        this.knowledgeService = knowledgeService;
     }
 
-    /** Quitar */
-    @GetMapping
-    public List<Note> getAllNotes() {
-        return knowledge.findAll();
+    @GetMapping("/")
+    public ResponseEntity<List<Knowledge>> getAllKnowledge() {
+        return ResponseEntity.ok(knowledgeService.findAllKnowledge());
+    }
+
+    @PostMapping("/")
+    public ResponseEntity<Knowledge> createKnowledge(@RequestBody KnowledgeDto knowledgeDto) {
+        return ResponseEntity.ok(knowledgeService.create(knowledgeDto));
     }
 
     /** GET /brain/search?q= → LIKE search on title, tags, content, summary */
     @GetMapping("/{id}")
-    public Knowledge getKnowlegeById(@RequestParam BigInteger id) {
-        return knowledge.search(q );
-    }
-
-    /** GET / → health check */
-    @GetMapping("/")
-    public Map<String, String> root() {
-        return Map.of("message", "Cortex Brain API is running 🧠");
+    public ResponseEntity<Knowledge> getKnowledgeById(@PathVariable BigInteger id) {
+        try{
+            Knowledge item = knowledgeService.findById(id);
+            return ResponseEntity.ok(item);
+        }catch (Exception e){
+            return ResponseEntity.notFound().build();
+        }
     }
 }
