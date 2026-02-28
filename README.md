@@ -1,4 +1,4 @@
-# Digital Brain – Backend (Java Spring Boot)
+# Cortex – Backend (Java Spring Boot)
 
 REST API built with **Spring Boot 3 + SQLite + Ollama (llama3.2)**.
 
@@ -53,8 +53,8 @@ The API will start on **http://localhost:8000**
 ## Project Structure
 
 ```
-src/main/java/com/digitalbrain/
-├── DigitalBrainApplication.java   ← Entry point
+src/main/java/com/cortex/
+├── CortexApplication.java   ← Entry point
 ├── config/
 │   └── CorsConfig.java            ← CORS (allow all origins)
 ├── model/
@@ -78,7 +78,7 @@ src/main/java/com/digitalbrain/
 
 ## Database
 
-SQLite file: `digital_brain.db` (auto-created next to the jar on startup)
+SQLite file: `cortex.db` (auto-created next to the jar on startup)
 
 Tables:
 - `inbox_items` – captured content with status lifecycle

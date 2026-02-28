@@ -1,43 +1,44 @@
 package com.cortex.controller;
 
-import com.cortex.dto.KnowledgeDto;
-import com.cortex.model.Knowledge;
-import com.cortex.service.KnowledgeService;
-import org.springframework.http.ResponseEntity;
+import com.cortex.model.Note;
+import com.cortex.repository.NoteRepository;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
-//arregar
+
 @RestController
-@RequestMapping("/brain/knowledge")
+@RequestMapping("/brain")
 public class BrainController {
 
-    private final KnowledgeService knowledgeService;
+    private final NoteRepository repo;
 
-    public BrainController(KnowledgeService knowledgeService) {
-        this.knowledgeService = knowledgeService;
+    public BrainController(NoteRepository repo) {
+        this.repo = repo;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<List<Knowledge>> getAllKnowledge() {
-        return ResponseEntity.ok(knowledgeService.findAllKnowledge());
-    }
-
-    @PostMapping("/")
-    public ResponseEntity<Knowledge> createKnowledge(@RequestBody KnowledgeDto knowledgeDto) {
-        return ResponseEntity.ok(knowledgeService.create(knowledgeDto));
+    /** GET /brain → all notes ordered by created_at desc */
+    @GetMapping
+    public List<Note> getAllNotes() {
+        return repo.findAll();
     }
 
     /** GET /brain/search?q= → LIKE search on title, tags, content, summary */
-    @GetMapping("/{id}")
-    public ResponseEntity<Knowledge> getKnowledgeById(@PathVariable BigInteger id) {
-        try{
-            Knowledge item = knowledgeService.findById(id);
-            return ResponseEntity.ok(item);
-        }catch (Exception e){
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping("/search")
+    public List<Note> searchNotes(@RequestParam String q) {
+        return repo.search(q);
+    }
+
+    /** GET / → health check */
+    @GetMapping("/")
+    public Map<String, String> root() {
+        return Map.of("message", "Cortex API is running 🧠");
+    }
+
+    /** DELETE /brain/{id} → delete note */
+    @DeleteMapping("/{id}")
+    public Map<String, String> deleteNote(@PathVariable String id) {
+        repo.delete(id);
+        return Map.of("message", "Note deleted successfully");
     }
 }
