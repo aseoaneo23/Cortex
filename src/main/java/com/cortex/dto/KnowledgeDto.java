@@ -1,32 +1,33 @@
-package com.cortex.model;
+package com.cortex.dto;
 
 import com.cortex.enums.KnowledgeStatus;
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 
-// Model=Como tratas la tabla desde java y ademas de model es el objeto
 @Data
 @Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "Knowledge")
-public class Knowledge {
+public class KnowledgeDto {
 
-    @Id
     private long id;
 
+    @NotBlank(message = "title is required")
     private String title;
 
-    @Column(length = 10000)
+    @NotBlank(message = "content is required")
     private String content;
 
     private String createdAt;
 
+    @NotBlank(message = "status is required")
     private int status;
 
     private String topic;
+
 
 }
