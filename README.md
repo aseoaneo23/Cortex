@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 Antonio Seoane De Ois
+SPDX-License-Identifier: EPL-2.0
+-->
+
+
 # Cortex – Backend (Java Spring Boot)
 
 REST API built with **Spring Boot 3 + SQLite + Ollama (llama3.2)**.

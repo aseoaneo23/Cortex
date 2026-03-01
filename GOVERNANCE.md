@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 Antonio Seoane De Ois
+SPDX-License-Identifier: EPL-2.0
+-->
+
+
 # Project Governance
 
 ## Roles

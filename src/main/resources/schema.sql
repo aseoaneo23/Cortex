@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2026 Antonio Seoane De Ois
+-- SPDX-License-Identifier: EPL-2.0
+
 CREATE TABLE IF NOT EXISTS inbox_items (
     id          TEXT PRIMARY KEY,
     type        TEXT NOT NULL,

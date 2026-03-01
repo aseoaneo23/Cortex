@@ -1,3 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Antonio Seoane De Ois
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+
+
 package com.cortex.service;
 
 import com.cortex.model.InboxItem;
