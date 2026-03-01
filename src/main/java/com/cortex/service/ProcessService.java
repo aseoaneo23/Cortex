@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class ProcessService {
@@ -20,6 +21,8 @@ public class ProcessService {
     private final InboxRepository inboxRepo;
     private final NoteRepository noteRepo;
     private final AiService aiService;
+    private final AtomicBoolean isPosting = new AtomicBoolean(false);
+
 
     public ProcessService(InboxRepository inboxRepo, NoteRepository noteRepo, AiService aiService) {
         this.inboxRepo = inboxRepo;
@@ -28,14 +31,21 @@ public class ProcessService {
     }
 
     public Note processSingle(String itemId) {
-        InboxItem item = inboxRepo.findById(itemId)
-                .filter(i -> "pending".equals(i.getStatus()))
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Pending item not found: " + itemId));
-
-        return processAndSave(item);
+        if (!isPosting.compareAndSet(false, true)) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Already processing an item, try again later.");
+        }
+        Note note;
+        try {
+            InboxItem item = inboxRepo.findById(itemId)
+                    .filter(i -> "pending".equals(i.getStatus()))
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "Pending item not found: " + itemId));
+            note = processAndSave(item);
+        } finally {
+            isPosting.set(false);
+        }
+        return note;
     }
-
     public List<Note> processAll() {
         List<InboxItem> pending = inboxRepo.findAllPending();
         List<Note> results = new ArrayList<>();
